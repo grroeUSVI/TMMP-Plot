@@ -2,11 +2,14 @@
 title: "TMMP Plot"
 output: html_document
 date: "2025-05-27"
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
 library(readxl)
 library(usethis)
+library(tidyverse)
 use_git()
 use_github()
 
@@ -16,7 +19,19 @@ FType <- read_excel("TMMP Living Dead By Forest Type.xlsx",
         "numeric", "numeric"))
 
 View(FType)
+str(FType)
 
+FType$`Sample Year`<-as.factor(FType$`Sample Year`)
+FType$SampleYear<-as.factor(FType$`Sample Year`)
+FType$`Tree Species`<-factor(FType$`Tree Species`, levels=c( "LARA","RHMA", "AVGE", "THPO","COER", "ACTO"))
+
+
+LivingPlot<-FType%>%
+  ggplot(aes(x=`Forest Type`, y=`Living Trees`, fill=`Sample Year`))+
+  geom_col(position="dodge")+
+  facet_wrap(~`Tree Species`, scales="free")
+
+LivingPlot
 ```
 
 
