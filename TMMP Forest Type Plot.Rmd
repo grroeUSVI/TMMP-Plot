@@ -1,0 +1,22 @@
+---
+title: "TMMP Plot"
+output: html_document
+date: "2025-05-27"
+---
+
+```{r setup, include=FALSE}
+library(readxl)
+library(usethis)
+
+use_github()
+
+
+FType <- read_excel("TMMP Living Dead By Forest Type.xlsx", 
+    col_types = c("text", "numeric", "text", 
+        "numeric", "numeric"))
+
+View(FType)
+
+```
+
+
