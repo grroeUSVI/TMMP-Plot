@@ -8,8 +8,11 @@ editor_options:
 
 ```{r setup, include=FALSE}
 library(readxl)
-library(usethis)
 library(tidyverse)
+
+
+library(usethis)
+
 use_git()
 use_github()
 
