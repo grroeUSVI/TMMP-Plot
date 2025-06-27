@@ -9,14 +9,9 @@ editor_options:
 ```{r setup, include=FALSE}
 library(readxl)
 library(tidyverse)
+library(patchwork)#combine plots
 
-
-library(usethis)
-
-use_git()
-use_github()
-
-
+#read in data
 FType <- read_excel("TMMP Living Dead By Forest Type.xlsx", 
     col_types = c("text", "numeric", "text", 
         "numeric", "numeric"))
@@ -24,17 +19,94 @@ FType <- read_excel("TMMP Living Dead By Forest Type.xlsx",
 View(FType)
 str(FType)
 
+#modify classes of data
 FType$`Sample Year`<-as.factor(FType$`Sample Year`)
 FType$SampleYear<-as.factor(FType$`Sample Year`)
 FType$`Tree Species`<-factor(FType$`Tree Species`, levels=c( "LARA","RHMA", "AVGE", "THPO","COER", "ACTO"))
 
-
-LivingPlot<-FType%>%
+#make a plot I like
+RHMA<-FType%>%
+  filter(`Tree Species`=="RHMA")%>%
   ggplot(aes(x=`Forest Type`, y=`Living Trees`, fill=`Sample Year`))+
   geom_col(position="dodge")+
-  facet_wrap(~`Tree Species`, scales="free")
+  theme(panel.background = element_rect(fill = "white", color = NA),
+        panel.grid.major = element_line(color = "grey80"),
+         panel.border = element_rect(color = "grey60", fill = NA, size = 0.8),
+        plot.title=element_text(face="italic", hjust=0.5))+
+  ggtitle("R. mangle")
+  
+RHMA
 
-LivingPlot
+#functionify the plot
+LivingTrees<-function(species_name, plot_title){FType%>%
+  filter(`Tree Species`== species_name )%>%
+  ggplot(aes(x=`Forest Type`, y=`Living Trees`, fill=`Sample Year`))+
+  geom_col(position="dodge")+
+  theme(panel.background = element_rect(fill = "white", color = NA),
+        panel.grid.major = element_line(color = "grey80"),
+         panel.border = element_rect(color = "grey60", fill = NA, size = 0.8),
+        plot.title=element_text(face="italic", hjust=0.5))+
+  ggtitle(plot_title)}
+
+#make a plot for each species
+RHMA<-LivingTrees("RHMA", "R. mangle")
+RHMA
+
+AVGE<-LivingTrees("AVGE","A. germinans")
+AVGE
+
+LARA<-LivingTrees("LARA", "L. racemosa")
+LARA
+
+COER<-LivingTrees("COER","C. erectus")
+COER
+
+THPO<-LivingTrees("THPO", "T. populnea")
+THPO
+
+ACTO<-LivingTrees("ACTO", "A. tortuosa")
+ACTO
+
+#combine all the plots 
+Living<-(LARA+RHMA+AVGE)/(THPO+COER+ACTO)+plot_layout(guides="collect")
+Living
+
+
+#make the function for dead trees
+DeadTrees<-function(species_name, plot_title){FType%>%
+  filter(`Tree Species`== species_name )%>%
+  ggplot(aes(x=`Forest Type`, y=`Dead Trees`, fill=`Sample Year`))+
+  geom_col(position="dodge")+
+  theme(panel.background = element_rect(fill = "white", color = NA),
+        panel.grid.major = element_line(color = "grey80"),
+         panel.border = element_rect(color = "grey60", fill = NA, size = 0.8),
+        plot.title=element_text(face="italic", hjust=0.5))+
+  ggtitle(plot_title)}
+
+#make a plot for all the species
+RHMAd<-DeadTrees("RHMA", "R. mangle")
+RHMAd
+
+AVGEd<-DeadTrees("AVGE","A. germinans")
+AVGEd
+
+LARAd<-DeadTrees("LARA", "L. racemosa")
+LARAd
+
+COERd<-DeadTrees("COER","C. erectus")
+COERd
+
+THPOd<-DeadTrees("THPO", "T. populnea")
+THPOd
+
+ACTOd<-DeadTrees("ACTO", "A. tortuosa")
+ACTOd
+
+#patchwork to combine plots
+Deadd<-(LARAd+RHMAd+AVGEd)/(THPOd+COERd+ACTOd)+plot_layout(guides="collect")
+Deadd
+
+
 ```
 
 
