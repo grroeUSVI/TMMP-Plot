@@ -60,20 +60,8 @@ PropTable<-Props %>%
   group_rows(index = rows_per_site) %>%  # group rows by Site
   kable_styling(full_width = FALSE)
 
-PropTable <- Props %>%
-  arrange(Site, SY) %>%
-  select(-Site) %>%
-  kbl(
-    col.names = colnames_italic,
-    booktabs = TRUE,
-    align = "c",
-    escape = FALSE  # important to render HTML formatting
-  ) %>%
-  group_rows(index = rows_per_site) %>%
-  kable_styling(full_width = FALSE)
-
 PropTable
 
 
-```
+?```
 
