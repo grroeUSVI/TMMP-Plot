@@ -1,0 +1,60 @@
+---
+title: "Report Data Wrangling"
+output: html_document
+date: "2025-06-27"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+library(readr)
+library(tidyverse)
+
+#in data downloaded trees some trees labeled as dying, changed to alive for this measurement in my CSV but not in the original data
+
+AdultTrees <- read_csv("Data/QA_QC TMMP Data 6-25-25 - Tree measurements.csv", 
+    col_types = cols(SY = col_number(), Date = col_date(format = "%m/%d/%Y"), 
+        Tag_num = col_number(), Azimuth_degree = col_number(), 
+        Dist_cm = col_number(), DBH_cm = col_number()))
+
+str(AdultTrees)
+
+AdultTrees$Species<-as.factor(AdultTrees$Species)
+AdultTrees$Mortality<-as.factor(AdultTrees$Mortality)
+AdultTrees$SY<-as.factor(AdultTrees$SY)
+AdultTrees$Site<-as.factor(AdultTrees$Site)
+
+#looking at number of trees living and dead by species 
+SpeciesTrees<-AdultTrees%>%
+  filter(Mortality!="NA")%>%
+  group_by(Site, Species, SY, Mortality)%>%
+  summarise(n=n())%>%
+  pivot_wider(names_from=Mortality, values_from=n)
+
+#looking at total living and dead trees not including species
+TotalTrees<-AdultTrees%>%
+  filter(Mortality!="NA")%>%
+  group_by(Site, SY, Mortality)%>%
+  summarise(n=n())%>%
+  pivot_wider(names_from=Mortality, values_from=n)
+
+#now looking at trees in great pond
+
+GP<-AdultTrees%>%
+  filter(Site=="Great Pond")%>%
+  select(SY, DBH_cm)
+
+
+#make a new thing to check mean mangrove tree measurements
+#looking at number of trees living and dead by species
+PCentCheck<-AdultTrees%>%
+  filter(Mortality=="Alive")%>%
+  filter(Species=="AVGE"|Species=="LARA"|Species=="RHMA")%>%
+  group_by(Site,SY, Species)%>%
+  summarise(n=n())%>%
+  pivot_wider(names_from=Species, values_from=n)%>%
+  mutate(TotalTrees==sum("LARA"+"RHMA"+"AVGE"))
+
+  
+```
+

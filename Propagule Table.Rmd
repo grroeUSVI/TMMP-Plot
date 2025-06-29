@@ -1,0 +1,79 @@
+---
+title: "Propagule Density Table"
+output: html_document
+date: "2025-06-29"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+library(readr)
+library(tidyverse)
+library(plotrix)#for SEM
+library(kableExtra)
+
+#import data
+Regen <- read_csv("Data/Regen.csv", col_types = cols(SY = col_number(), 
+    Date = col_date(format = "%m/%d/%Y"), 
+    Water_depth_cm = col_number(), Tall_seedling_cm = col_number(), 
+    Tall_sapling_cm = col_number(), RHMA_props_roots = col_number(), 
+    RHMA_props_noroots = col_number(), RHMA_propagules = col_number(), 
+    RHMA_seedlings = col_number(), LARA_seedlings = col_number(), 
+    LARA_saplings = col_number(), AVGE_props_roots = col_number(), 
+    AVGE_props_noroots = col_number(), AVGE_propagules = col_number(), 
+    AVGE_seedlings = col_number(), AVGE_saplings = col_number(), 
+    Total_saplings = col_number()))
+
+View(Regen)
+
+#group by year and site, calculate mean +-sem number of props 
+
+Props<-Regen%>%
+  group_by(Site,SY)%>%
+  summarise(`L. racemosa`=mean(LARA_propagules), `R. mangle`=mean(RHMA_propagules), `A. germinans`=mean(AVGE_propagules), SEMLARA=std.error(LARA_propagules), SEMRHMA=std.error(RHMA_propagules), SEMAVGE=std.error(AVGE_propagules))%>%
+  ungroup()%>%
+  mutate(across(where(is.numeric), ~round(.x,1)))%>%
+  mutate(`R. mangle`=paste(`R. mangle`,"±",SEMRHMA), `A. germinans`=paste(`A. germinans`,"±", SEMAVGE), `L. racemosa`=paste(`L. racemosa`,"±", SEMLARA))%>%
+  select(Site, SY, `R. mangle`,`A. germinans`,`L. racemosa`)
+
+str(Props)
+
+rows_per_site <- table(Props$Site)
+
+colnames_italic <- c(
+  " ",
+  cell_spec("R. mangle", italic = TRUE),
+  cell_spec("A. germinans", italic = TRUE),
+  cell_spec("L. racemosa", italic = TRUE)
+)
+
+
+PropTable<-Props %>%
+  arrange(Site, SY) %>%  # ensure ordering
+  select(-Site) %>%      # remove Site from visible columns, used for grouping
+  kbl(
+    col.names = colnames_italic,
+    booktabs = TRUE,
+    align = "c",
+    escape = FALSE  #important to render HTML formatting
+  ) %>%
+  group_rows(index = rows_per_site) %>%  # group rows by Site
+  kable_styling(full_width = FALSE)
+
+PropTable <- Props %>%
+  arrange(Site, SY) %>%
+  select(-Site) %>%
+  kbl(
+    col.names = colnames_italic,
+    booktabs = TRUE,
+    align = "c",
+    escape = FALSE  # important to render HTML formatting
+  ) %>%
+  group_rows(index = rows_per_site) %>%
+  kable_styling(full_width = FALSE)
+
+PropTable
+
+
+```
+
